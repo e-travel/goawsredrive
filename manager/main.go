@@ -16,19 +16,16 @@ import (
 type Response events.APIGatewayProxyResponse
 
 type StackRequest struct {
-	Name     string `json:"name"`
-	HttpVerb string `json:"http_verb"`
-	Endpoint string `json:"endpoint"`
+	Name                     string `json:"name"`
+	HttpVerb                 string `json:"http_verb"`
+	Endpoint                 string `json:"endpoint"`
+	MessageVisibilityTimeout int    `json:"message_visibility_timeout"`
 }
 
 // Handler is our lambda handler invoked by the `lambda.Start` function call
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (Response, error) {
 	log.Printf("Processing request data for request %s.\n", request.RequestContext.RequestID)
 	log.Printf("Body size = %d.\n", len(request.Body))
-	log.Println("Headers:")
-	for key, value := range request.Headers {
-		log.Printf("    %s: %s\n", key, value)
-	}
 
 	// If no name is provided in the HTTP request body, throw an error
 	if len(request.Body) < 1 {
@@ -43,10 +40,14 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (Respon
 		return Response{StatusCode: 400}, err
 	}
 
+	if len(stackRequest.Endpoint) < 1 || len(stackRequest.HttpVerb) < 1 || len(stackRequest.Name) < 1 {
+		return Response{StatusCode: 400}, nil
+	}
+
 	echo, err := json.Marshal(stackRequest)
 
 	resp := Response{
-		StatusCode:      200,
+		StatusCode:      201,
 		IsBase64Encoded: false,
 		Body:            string(echo),
 		Headers: map[string]string{

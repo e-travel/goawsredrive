@@ -21,3 +21,4 @@ functions:
       - http:
           path: manager
           method: post
+          cors: true
