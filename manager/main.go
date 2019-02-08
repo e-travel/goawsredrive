@@ -86,7 +86,34 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (Respon
 		return Response{StatusCode: 500}, nil
 	}
 
-	stackRequest.StackId = createStackOutput.GoString()
+	stackRequest.StackId = *createStackOutput.StackId
+
+	describeStacksInput := &cloudformation.DescribeStacksInput{
+		StackName: aws.String(stackRequest.Name),
+	}
+
+	err = client.WaitUntilStackExists(describeStacksInput)
+
+	if err != nil {
+		log.Fatal(err)
+		return Response{StatusCode: 500}, nil
+	}
+
+	log.Println("Stack created: " + stackRequest.StackId)
+
+	describeStackResourceInput := &cloudformation.DescribeStackResourceInput{
+		LogicalResourceId: aws.String("Queue"),
+		StackName:         aws.String(stackRequest.Name),
+	}
+
+	describeStackResourceOutput, err := client.DescribeStackResource(describeStackResourceInput)
+
+	if err != nil {
+		log.Fatal(err)
+		return Response{StatusCode: 500}, nil
+	}
+
+	log.Println(describeStackResourceOutput.StackResourceDetail.PhysicalResourceId)
 
 	echo, err := json.Marshal(stackRequest)
 
