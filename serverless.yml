@@ -24,6 +24,7 @@ functions:
     handler: bin/redrive
   manager:
     handler: bin/manager
+    timeout: 60
     events:
       - http:
           path: manager

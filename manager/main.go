@@ -92,7 +92,7 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (Respon
 		StackName: aws.String(stackRequest.Name),
 	}
 
-	err = client.WaitUntilStackExists(describeStacksInput)
+	err = client.WaitUntilStackCreateComplete(describeStacksInput)
 
 	if err != nil {
 		log.Fatal(err)

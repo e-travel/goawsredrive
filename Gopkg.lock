@@ -2,17 +2,20 @@
 
 
 [[projects]]
+  digest = "1:4775daf89638182e60b52ca32dacecb030aff6f9dcecb28af389f6e8aa807ac7"
   name = "github.com/aws/aws-lambda-go"
   packages = [
     "events",
     "lambda",
     "lambda/messages",
-    "lambdacontext"
+    "lambdacontext",
   ]
+  pruneopts = ""
   revision = "527f5d301d2993af078be6d0b63372786b3fc18f"
   version = "v1.8.2"
 
 [[projects]]
+  digest = "1:38b2a78b2e33f17514d7682c0a467dbb04e3caded3bb2b28e6dd935b14c5e2be"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -49,19 +52,38 @@
     "private/protocol/xml/xmlutil",
     "service/cloudformation",
     "service/s3",
-    "service/sts"
+    "service/sts",
   ]
+  pruneopts = ""
   revision = "130e7e7f5cfa00e267b884bd2772ae986f9e8273"
   version = "v1.16.30"
 
 [[projects]]
+  branch = "develop"
+  digest = "1:c5427dce97298bfb0480461eb20b391231a08ef132aabba07f8dc95539f651c6"
+  name = "github.com/e-travel/goawsredrive"
+  packages = ["models"]
+  pruneopts = ""
+  revision = "4b1a7888f2ee2062aedcd23be6cc0dea6c5c8f72"
+
+[[projects]]
+  digest = "1:13fe471d0ed891e8544eddfeeb0471fd3c9f2015609a1c000aefdedf52a19d40"
   name = "github.com/jmespath/go-jmespath"
   packages = ["."]
+  pruneopts = ""
   revision = "c2b33e84"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "85af8555d7a6de52ffcea13c6303a68dcf8eb7c7048ed50439d8365d10ce0015"
+  input-imports = [
+    "github.com/aws/aws-lambda-go/events",
+    "github.com/aws/aws-lambda-go/lambda",
+    "github.com/aws/aws-sdk-go/aws",
+    "github.com/aws/aws-sdk-go/aws/session",
+    "github.com/aws/aws-sdk-go/service/cloudformation",
+    "github.com/aws/aws-sdk-go/service/s3",
+    "github.com/e-travel/goawsredrive/models",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
