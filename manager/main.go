@@ -5,8 +5,12 @@ import (
 	"encoding/json"
 	"log"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/service/cloudformation"
 )
 
 // Response is of type APIGatewayProxyResponse since we're leveraging the
@@ -19,7 +23,10 @@ type StackRequest struct {
 	Name                     string `json:"name"`
 	HttpVerb                 string `json:"http_verb"`
 	Endpoint                 string `json:"endpoint"`
-	MessageVisibilityTimeout int    `json:"message_visibility_timeout"`
+	MessageVisibilityTimeout string `json:"message_visibility_timeout"`
+	AlarmSubscriber          string `json:"alarm_subscriber"`
+	TemplateURL              string `json:"template_url"`
+	StackId                  string `json:"new_stack_id"`
 }
 
 // Handler is our lambda handler invoked by the `lambda.Start` function call
@@ -43,6 +50,43 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (Respon
 	if len(stackRequest.Endpoint) < 1 || len(stackRequest.HttpVerb) < 1 || len(stackRequest.Name) < 1 {
 		return Response{StatusCode: 400}, nil
 	}
+
+	createStackInput := &cloudformation.CreateStackInput{
+		StackName:   aws.String(stackRequest.Name),
+		TemplateURL: aws.String(stackRequest.TemplateURL),
+		Parameters: []*cloudformation.Parameter{
+			&cloudformation.Parameter{
+				ParameterKey:   aws.String("ResourcesName"),
+				ParameterValue: aws.String(stackRequest.Name),
+			},
+			&cloudformation.Parameter{
+				ParameterKey:   aws.String("SQSQueueVisibilityTimeout"),
+				ParameterValue: aws.String(stackRequest.MessageVisibilityTimeout),
+			},
+			&cloudformation.Parameter{
+				ParameterKey:   aws.String("SingleStack"),
+				ParameterValue: aws.String("false"),
+			},
+			&cloudformation.Parameter{
+				ParameterKey:   aws.String("AlarmSubscriber"),
+				ParameterValue: aws.String(stackRequest.AlarmSubscriber),
+			},
+		},
+	}
+
+	// create aws session
+	sess := session.Must(session.NewSession())
+
+	client := cloudformation.New(sess)
+
+	createStackOutput, err := client.CreateStack(createStackInput)
+
+	if err != nil {
+		log.Fatal(err)
+		return Response{StatusCode: 500}, nil
+	}
+
+	stackRequest.StackId = createStackOutput.GoString()
 
 	echo, err := json.Marshal(stackRequest)
 
